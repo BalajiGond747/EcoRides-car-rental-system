@@ -1,9 +1,15 @@
 package com.ecorides.controller;
 
-import com.ecorides.payload.dto.PaymentDto;
+import com.ecorides.payload.dto.PaymentDTO;
+import com.ecorides.payload.response.ApiResponse;
 import com.ecorides.service.PaymentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -12,16 +18,31 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-
     @PostMapping("/create-order/{bookingId}")
-    public PaymentDto createOrder(@PathVariable Long bookingId) {
-        return paymentService.createOrder(bookingId);
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<PaymentDTO>> createOrder(@PathVariable Long bookingId) {
+
+        PaymentDTO payment = paymentService.createOrder(bookingId);
+
+        return ResponseEntity.ok(ApiResponse.<PaymentDTO>builder()
+                .success(true)
+                .message("Payment order created successfully")
+                .data(payment)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
 
-
     @PostMapping("/verify")
-    public String verify(@RequestBody PaymentDto dto) {
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<Object>> verify(@Valid @RequestBody PaymentDTO dto) {
+
         paymentService.verifyPayment(dto);
-        return "Payment Successful";
+
+        return ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .message("Payment verified successfully")
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
 }

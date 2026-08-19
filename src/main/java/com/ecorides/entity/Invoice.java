@@ -1,8 +1,14 @@
 package com.ecorides.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,7 +23,6 @@ public class Invoice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // ONE INVOICE PER BOOKING
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id", nullable = false, unique = true)
     private Booking booking;
@@ -25,20 +30,20 @@ public class Invoice {
     @Column(nullable = false, unique = true)
     private String invoiceNumber;
 
-    @Column(nullable = false)
-    private double amount;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal amount;
 
-    @Column(nullable = false)
-    private double tax;   // GST
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal tax;
 
-    @Column(nullable = false)
-    private double totalAmount;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal totalAmount;
 
-    @Column(nullable = false)
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private LocalDateTime generatedAt;
 
-    @PrePersist
-    public void prePersist() {
-        this.generatedAt = LocalDateTime.now();
-    }
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
 }

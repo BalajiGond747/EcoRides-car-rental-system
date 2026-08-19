@@ -1,10 +1,10 @@
 package com.ecorides.service;
 
-import com.ecorides.payload.dto.MaintenanceDto;
+import com.ecorides.payload.dto.MaintenanceDTO;
 
 public interface MaintenanceService {
 
-    MaintenanceDto createMaintenance(MaintenanceDto dto);
+    MaintenanceDTO createMaintenance(MaintenanceDTO dto);
 
-    MaintenanceDto completeMaintenance(Long id);
+    MaintenanceDTO completeMaintenance(Long id);
 }

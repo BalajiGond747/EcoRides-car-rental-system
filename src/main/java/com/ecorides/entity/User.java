@@ -1,21 +1,25 @@
 package com.ecorides.entity;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+import com.ecorides.domain.AuthProvider;
 import com.ecorides.domain.UserRole;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
@@ -31,13 +35,13 @@ public class User implements UserDetails {
     @Column(nullable = false, length = 50)
     private String lastName;
 
-    @Column(unique = true, nullable = false, length = 15)
+    @Column(length = 15)
     private String phone;
 
-    @Column(nullable = false)
+    @Column
     private String password;
 
-    @Column(unique = true, length = 100)
+    @Column(unique = true, nullable = false, length = 100)
     private String email;
 
     @Column(length = 200)
@@ -45,18 +49,23 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserRole userRole;
+    private UserRole userRole = UserRole.USER;
 
     @Column(nullable = false)
     private Boolean isActive = true;
 
     @Column(nullable = false)
-    private Boolean isVerified = true;
+    private Boolean isVerified = false;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Booking> bookings = new ArrayList<>();
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private AuthProvider provider = AuthProvider.LOCAL;
 
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -65,7 +74,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return phone;
+        return email;
     }
 
     @Override

@@ -1,25 +1,28 @@
 package com.ecorides.mappers;
 
 import com.ecorides.entity.ChargingSession;
-import com.ecorides.payload.dto.ChargingSessionDto;
+import com.ecorides.payload.dto.ChargingSessionDTO;
 
 public class ChargingSessionMapper {
 
-    private ChargingSessionMapper() {}
+    public static ChargingSessionDTO toDto(ChargingSession session) {
 
-    public static ChargingSessionDto toDto(ChargingSession session) {
-        if (session == null) return null;
+        if (session == null) {
+            return null;
+        }
 
-        return ChargingSessionDto.builder()
+        return ChargingSessionDTO.builder()
                 .id(session.getId())
-                .carId(session.getCar().getId())
-                .startTime(
-                        session.getStartTime() != null ? session.getStartTime().toString() : null
-                )
-                .endTime(
-                        session.getEndTime() != null ? session.getEndTime().toString() : null
-                )
+                .carId(session.getCar() != null ? session.getCar()
+                        .getId() : null)
+                .startTime(session.getStartTime())
+                .endTime(session.getEndTime())
                 .chargeAdded(session.getChargeAdded())
+                .status(session.getStatus())
+                .createdAt(session.getCreatedAt())
+                .updatedAt(session.getUpdatedAt())
                 .build();
+
     }
+
 }

@@ -1,23 +1,25 @@
 package com.ecorides.service;
 
-
-import com.ecorides.payload.dto.LocationDto;
+import com.ecorides.payload.dto.LocationDTO;
 
 import java.util.List;
 
 public interface LocationService {
 
-    LocationDto createLocation(LocationDto dto);
+    LocationDTO createLocation(LocationDTO dto);
 
-    LocationDto getLocationById(Long id);
+    LocationDTO getLocationById(Long id);
 
-    List<LocationDto> getAllLocations();
+    List<LocationDTO> getAllLocations();
 
-    List<LocationDto> getActiveLocations();
+    List<LocationDTO> getActiveLocations();
 
-    List<LocationDto> getLocationsByCity(String city);
+    List<LocationDTO> getLocationsByCity(String city);
 
-    LocationDto updateLocation(Long id, LocationDto dto);
+    LocationDTO updateLocation(Long id, LocationDTO dto);
+
+    void activateLocation(Long id);
 
     void deactivateLocation(Long id);
+
 }

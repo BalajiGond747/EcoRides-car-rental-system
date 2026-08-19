@@ -1,7 +1,6 @@
 package com.ecorides.domain;
 
 public enum MaintenanceStatus {
-    SCHEDULED,
-    IN_PROGRESS,
-    COMPLETED
+
+    SCHEDULED, IN_PROGRESS, COMPLETED
 }

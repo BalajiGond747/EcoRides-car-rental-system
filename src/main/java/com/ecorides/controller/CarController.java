@@ -1,17 +1,18 @@
 package com.ecorides.controller;
 
-
+import com.ecorides.domain.CarStatus;
 import com.ecorides.payload.dto.CarDTO;
+import com.ecorides.payload.response.ApiResponse;
 import com.ecorides.service.CarService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/cars")
@@ -20,68 +21,137 @@ public class CarController {
 
     private final CarService carService;
 
-
     @PostMapping
-    public ResponseEntity<CarDTO> createCar(@Valid @RequestBody CarDTO dto) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(carService.createCar(dto));
-    }
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<CarDTO>> createCar(@Valid @RequestBody CarDTO dto) {
 
+        CarDTO car = carService.createCar(dto);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.<CarDTO>builder()
+                        .success(true)
+                        .message("Car created successfully")
+                        .data(car)
+                        .timestamp(LocalDateTime.now())
+                        .build());
+    }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CarDTO> updateCar(
-            @PathVariable Long id,
-            @Valid @RequestBody CarDTO dto) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<CarDTO>> updateCar(@PathVariable Long id, @Valid @RequestBody CarDTO dto) {
 
-        return ResponseEntity.ok(carService.updateCar(id, dto));
+        CarDTO car = carService.updateCar(id, dto);
+
+        return ResponseEntity.ok(ApiResponse.<CarDTO>builder()
+                .success(true)
+                .message("Car updated successfully")
+                .data(car)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
 
-
     @PutMapping("/{id}/activate")
-    public ResponseEntity<?> activateCar(@PathVariable Long id) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Object>> activateCar(@PathVariable Long id) {
+
         carService.activateCar(id);
-        return ResponseEntity.ok(Map.of("message", "Car activated"));
+
+        return ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .message("Car activated successfully")
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
 
     @PutMapping("/{id}/deactivate")
-    public ResponseEntity<?> deactivateCar(@PathVariable Long id) {
-        carService.deactivateCar(id);
-        return ResponseEntity.ok(Map.of("message", "Car deactivated"));
-    }
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Object>> deactivateCar(@PathVariable Long id) {
 
+        carService.deactivateCar(id);
+
+        return ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .message("Car deactivated successfully")
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<CarDTO> updateStatus(
-            @PathVariable Long id,
-            @RequestParam String status) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<CarDTO>> updateStatus(@PathVariable Long id, @RequestParam CarStatus status) {
 
-        return ResponseEntity.ok(carService.updateCarStatus(id, status));
+        CarDTO car = carService.updateCarStatus(id, status);
+
+        return ResponseEntity.ok(ApiResponse.<CarDTO>builder()
+                .success(true)
+                .message("Car status updated")
+                .data(car)
+                .timestamp(LocalDateTime.now())
+                .build());
+
     }
-
 
     @GetMapping("/{id}")
-    public ResponseEntity<CarDTO> getCarById(@PathVariable Long id) {
-        return ResponseEntity.ok(carService.getCarById(id));
-    }
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<CarDTO>> getCarById(@PathVariable Long id) {
 
+        return ResponseEntity.ok(ApiResponse.<CarDTO>builder()
+                .success(true)
+                .message("Car fetched successfully")
+                .data(carService.getCarById(id))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
 
     @GetMapping
-    public ResponseEntity<List<CarDTO>> getAllCars() {
-        return ResponseEntity.ok(carService.getAllCars());
-    }
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<List<CarDTO>>> getAllCars() {
 
+        return ResponseEntity.ok(ApiResponse.<List<CarDTO>>builder()
+                .success(true)
+                .message("Cars fetched successfully")
+                .data(carService.getAllCars())
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
 
     @GetMapping("/available")
-    public ResponseEntity<List<CarDTO>> getAvailableCars() {
-        return ResponseEntity.ok(carService.getAvailableCars());
-    }
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<List<CarDTO>>> getAvailableCars() {
 
+        return ResponseEntity.ok(ApiResponse.<List<CarDTO>>builder()
+                .success(true)
+                .message("Available cars fetched")
+                .data(carService.getAvailableCars())
+                .timestamp(LocalDateTime.now())
+                .build());
+
+    }
 
     @GetMapping("/location/{locationId}")
-    public ResponseEntity<List<CarDTO>> getByLocation(
-            @PathVariable Long locationId) {
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<List<CarDTO>>> getCarsByLocation(@PathVariable Long locationId) {
 
-        return ResponseEntity.ok(carService.getCarsByLocation(locationId));
+        return ResponseEntity.ok(ApiResponse.<List<CarDTO>>builder()
+                .success(true)
+                .message("Cars fetched successfully")
+                .data(carService.getCarsByLocation(locationId))
+                .timestamp(LocalDateTime.now())
+                .build());
     }
+
+    @GetMapping("/category/{category}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<List<CarDTO>>> getCarsByCategory(@PathVariable String category) {
+
+        return ResponseEntity.ok(ApiResponse.<List<CarDTO>>builder()
+                .success(true)
+                .message("Cars fetched successfully")
+                .data(carService.getCarsByCategory(category))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
 }

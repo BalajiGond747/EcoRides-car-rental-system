@@ -2,7 +2,14 @@ package com.ecorides.entity;
 
 import com.ecorides.domain.CarStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "cars")
@@ -25,10 +32,11 @@ public class Car {
     @Column(nullable = false, unique = true, length = 20)
     private String registrationNumber;
 
-    @Column(nullable = false)
-    private double pricePerDay;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal pricePerDay;
 
-
+    @Min(0)
+    @Max(100)
     @Column(nullable = false)
     private int batteryLevel;
 
@@ -43,9 +51,16 @@ public class Car {
     @JoinColumn(name = "location_id", nullable = false)
     private Location location;
 
-    private int seatingCapacity;
+    private Integer seatingCapacity;
 
+    @Column(length = 500)
     private String imageUrl;
 
     private Boolean isActive = true;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }

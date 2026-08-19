@@ -1,6 +1,5 @@
 package com.ecorides.mappers;
 
-
 import com.ecorides.domain.CarStatus;
 import com.ecorides.entity.Car;
 import com.ecorides.payload.dto.CarDTO;
@@ -10,9 +9,11 @@ import java.util.stream.Collectors;
 
 public class CarMapper {
 
-
     public static CarDTO toDTO(Car car) {
-        if (car == null) return null;
+
+        if (car == null) {
+            return null;
+        }
 
         return CarDTO.builder()
                 .id(car.getId())
@@ -23,25 +24,31 @@ public class CarMapper {
                 .batteryLevel(car.getBatteryLevel())
                 .rangeKm(car.getRangeKm())
                 .status(car.getStatus())
-                .locationId(
-                        car.getLocation() != null ? car.getLocation().getId() : null
-                )
+                .locationId(car.getLocation() != null ? car.getLocation()
+                        .getId() : null)
                 .seatingCapacity(car.getSeatingCapacity())
                 .imageUrl(car.getImageUrl())
                 .isActive(car.getIsActive())
                 .build();
     }
 
-
     public static List<CarDTO> toDTOList(List<Car> cars) {
+
+        if (cars == null) {
+            return List.of();
+        }
+
         return cars.stream()
                 .map(CarMapper::toDTO)
                 .collect(Collectors.toList());
+
     }
 
-
     public static Car toEntity(CarDTO dto) {
-        if (dto == null) return null;
+
+        if (dto == null) {
+            return null;
+        }
 
         return Car.builder()
                 .name(dto.getName())
@@ -55,40 +62,47 @@ public class CarMapper {
                 .status(CarStatus.AVAILABLE)
                 .isActive(true)
                 .build();
-    }
 
+    }
 
     public static void updateEntity(Car car, CarDTO dto) {
-        if (car == null || dto == null) return;
 
-        if (dto.getName() != null)
+        if (car == null || dto == null) {
+            return;
+        }
+
+        if (dto.getName() != null) {
             car.setName(dto.getName());
+        }
 
-        if (dto.getCategory() != null)
+        if (dto.getCategory() != null) {
             car.setCategory(dto.getCategory());
+        }
 
-        if (dto.getRegistrationNumber() != null)
+        if (dto.getRegistrationNumber() != null) {
             car.setRegistrationNumber(dto.getRegistrationNumber());
+        }
 
-        if (dto.getBatteryLevel() != null)
-            car.setBatteryLevel(dto.getBatteryLevel());
-
-        if (dto.getRangeKm() != null)
-            car.setRangeKm(dto.getRangeKm());
-
-        if (dto.getPricePerDay() != null)
+        if (dto.getPricePerDay() != null) {
             car.setPricePerDay(dto.getPricePerDay());
+        }
 
+        if (dto.getBatteryLevel() != null) {
+            car.setBatteryLevel(dto.getBatteryLevel());
+        }
 
-        if (dto.getSeatingCapacity() > 0)
+        if (dto.getRangeKm() != null) {
+            car.setRangeKm(dto.getRangeKm());
+        }
+
+        if (dto.getSeatingCapacity() != null) {
             car.setSeatingCapacity(dto.getSeatingCapacity());
+        }
 
-        if (dto.getImageUrl() != null)
+        if (dto.getImageUrl() != null) {
             car.setImageUrl(dto.getImageUrl());
-
-        if (dto.getIsActive() != null)
-            car.setIsActive(dto.getIsActive());
-
+        }
 
     }
+
 }

@@ -1,13 +1,13 @@
 package com.ecorides.service;
 
 
-import com.ecorides.payload.dto.InvoiceDto;
+import com.ecorides.payload.dto.InvoiceDTO;
 
 public interface InvoiceService {
 
-    InvoiceDto generateInvoice(Long bookingId);
+    InvoiceDTO generateInvoice(Long bookingId);
 
-    InvoiceDto getInvoiceByBooking(Long bookingId);
+    InvoiceDTO getInvoiceByBooking(Long bookingId);
 
     byte[] generateInvoicePdf(Long bookingId);
 }

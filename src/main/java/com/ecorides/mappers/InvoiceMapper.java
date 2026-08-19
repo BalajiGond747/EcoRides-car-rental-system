@@ -1,23 +1,28 @@
 package com.ecorides.mappers;
 
 import com.ecorides.entity.Invoice;
-import com.ecorides.payload.dto.InvoiceDto;
+import com.ecorides.payload.dto.InvoiceDTO;
 
 public class InvoiceMapper {
 
-    private InvoiceMapper() {}
+    public static InvoiceDTO toDto(Invoice invoice) {
 
-    public static InvoiceDto toDto(Invoice invoice) {
-        if (invoice == null) return null;
+        if (invoice == null) {
+            return null;
+        }
 
-        return InvoiceDto.builder()
+        return InvoiceDTO.builder()
                 .id(invoice.getId())
-                .bookingId(invoice.getBooking().getId())
+                .bookingId(invoice.getBooking() != null ? invoice.getBooking()
+                        .getId() : null)
                 .invoiceNumber(invoice.getInvoiceNumber())
                 .amount(invoice.getAmount())
                 .tax(invoice.getTax())
                 .totalAmount(invoice.getTotalAmount())
-                .generatedAt(invoice.getGeneratedAt().toString())
+                .generatedAt(invoice.getGeneratedAt())
+                .updatedAt(invoice.getUpdatedAt())
                 .build();
+
     }
+
 }

@@ -5,5 +5,6 @@ public enum CarStatus {
     BOOKED,
     IN_USE,
     CHARGING,
-    MAINTENANCE
+    MAINTENANCE,
+    INACTIVE
 }

@@ -1,14 +1,17 @@
 package com.ecorides.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.ecorides.domain.CouponType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "coupons")
@@ -19,13 +22,25 @@ import java.time.LocalDate;
 public class Coupon {
 
     @Id
+    @Column(length = 50)
     private String code;
 
-    private String type;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CouponType type;
 
-    private Double value;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal value;
 
+    @Column(nullable = false)
     private LocalDate expiryDate;
 
-    private boolean active;
+    private Boolean isActive = true;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
 }

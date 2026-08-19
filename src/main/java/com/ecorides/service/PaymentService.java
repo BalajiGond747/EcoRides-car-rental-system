@@ -1,10 +1,11 @@
 package com.ecorides.service;
 
-import com.ecorides.payload.dto.PaymentDto;
+import com.ecorides.payload.dto.PaymentDTO;
 
 public interface PaymentService {
 
-    PaymentDto createOrder(Long bookingId);
+    PaymentDTO createOrder(Long bookingId);
 
-    void verifyPayment(PaymentDto dto);
+    void verifyPayment(PaymentDTO dto);
+
 }

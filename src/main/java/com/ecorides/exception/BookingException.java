@@ -1,6 +1,5 @@
 package com.ecorides.exception;
 
-
 public class BookingException extends RuntimeException {
 
     public BookingException(String message) {

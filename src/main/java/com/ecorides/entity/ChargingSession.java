@@ -1,8 +1,15 @@
 package com.ecorides.entity;
 
+import com.ecorides.domain.ChargingStatus;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -25,5 +32,17 @@ public class ChargingSession {
 
     private LocalDateTime endTime;
 
-    private Double chargeAdded;
+    @Column(nullable = false, precision = 5, scale = 2)
+    private BigDecimal chargeAdded;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ChargingStatus status;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
 }

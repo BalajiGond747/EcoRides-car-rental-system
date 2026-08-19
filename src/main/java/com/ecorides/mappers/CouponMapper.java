@@ -1,37 +1,63 @@
 package com.ecorides.mappers;
 
 import com.ecorides.entity.Coupon;
-import com.ecorides.payload.dto.CouponDto;
-
-import java.time.LocalDate;
+import com.ecorides.payload.dto.CouponDTO;
 
 public class CouponMapper {
 
-    private CouponMapper() {}
+    public static CouponDTO toDto(Coupon coupon) {
 
-    public static CouponDto toDto(Coupon coupon) {
-        if (coupon == null) return null;
+        if (coupon == null) {
+            return null;
+        }
 
-        return CouponDto.builder()
+        return CouponDTO.builder()
                 .code(coupon.getCode())
                 .type(coupon.getType())
                 .value(coupon.getValue())
-                .expiryDate(
-                        coupon.getExpiryDate() != null ? coupon.getExpiryDate().toString() : null
-                )
-                .active(coupon.isActive())
+                .expiryDate(coupon.getExpiryDate())
+                .isActive(coupon.getIsActive())
                 .build();
     }
 
-    public static Coupon toEntity(CouponDto dto) {
-        if (dto == null) return null;
+    public static Coupon toEntity(CouponDTO dto) {
+
+        if (dto == null) {
+            return null;
+        }
 
         return Coupon.builder()
                 .code(dto.getCode())
                 .type(dto.getType())
                 .value(dto.getValue())
-                .expiryDate(LocalDate.parse(dto.getExpiryDate()))
-                .active(true)
+                .expiryDate(dto.getExpiryDate())
+                .isActive(true)
                 .build();
+
     }
+
+    public static void updateEntity(Coupon coupon, CouponDTO dto) {
+
+        if (coupon == null || dto == null) {
+            return;
+        }
+
+        if (dto.getType() != null) {
+            coupon.setType(dto.getType());
+        }
+
+        if (dto.getValue() != null) {
+            coupon.setValue(dto.getValue());
+        }
+
+        if (dto.getExpiryDate() != null) {
+            coupon.setExpiryDate(dto.getExpiryDate());
+        }
+
+        if (dto.getIsActive() != null) {
+            coupon.setIsActive(dto.getIsActive());
+        }
+
+    }
+
 }

@@ -1,10 +1,12 @@
 package com.ecorides.repository;
 
+import com.ecorides.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
 import java.util.Optional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import com.ecorides.entity.User;
+@Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByPhone(String phone);

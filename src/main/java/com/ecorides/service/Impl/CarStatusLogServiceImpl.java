@@ -8,8 +8,6 @@ import com.ecorides.service.CarStatusLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 @Service
 @RequiredArgsConstructor
 public class CarStatusLogServiceImpl implements CarStatusLogService {
@@ -22,9 +20,10 @@ public class CarStatusLogServiceImpl implements CarStatusLogService {
         CarStatusLog log = CarStatusLog.builder()
                 .carId(car.getId())
                 .status(status)
-                .updatedAt(LocalDateTime.now())
                 .build();
 
         repository.save(log);
+
     }
+
 }

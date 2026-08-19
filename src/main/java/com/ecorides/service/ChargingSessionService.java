@@ -1,10 +1,12 @@
 package com.ecorides.service;
 
-import com.ecorides.payload.dto.ChargingSessionDto;
+import com.ecorides.payload.dto.ChargingSessionDTO;
+
+import java.math.BigDecimal;
 
 public interface ChargingSessionService {
 
-    ChargingSessionDto startCharging(Long carId);
+    ChargingSessionDTO startCharging(Long carId);
 
-    ChargingSessionDto endCharging(Long sessionId, Double chargeAdded);
+    ChargingSessionDTO endCharging(Long sessionId, BigDecimal chargeAdded);
 }
