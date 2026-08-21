@@ -1,5 +1,6 @@
 package com.ecorides.service.Impl;
 
+import com.ecorides.domain.UserRole;
 import com.ecorides.entity.User;
 import com.ecorides.exception.ResourceNotFoundException;
 import com.ecorides.exception.UserException;
@@ -31,8 +32,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponse> getAllUsers() {
-
-        List<User> users = userRepository.findAll();
+        List<User> users = userRepository.findByUserRole(UserRole.USER);
         return UserMapper.toUserResponseList(users);
     }
 

@@ -15,22 +15,24 @@ import com.ecorides.payload.dto.PaymentDTO;
 import com.ecorides.repository.BookingRepository;
 import com.ecorides.repository.PaymentRepository;
 import com.ecorides.repository.UserRepository;
+import com.ecorides.service.InvoiceService;
 import com.ecorides.service.PaymentService;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +44,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final BookingRepository bookingRepository;
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
+    private final InvoiceService invoiceService;
 
     @Override
     public PaymentDTO createOrder(Long bookingId) {
@@ -153,6 +156,7 @@ public class PaymentServiceImpl implements PaymentService {
             booking.setStatus(BookingStatus.CONFIRMED);
 
             paymentRepository.save(payment);
+            invoiceService.generateInvoice(booking.getId());
 
         } catch (PaymentException ex) {
             throw ex;
@@ -192,4 +196,27 @@ public class PaymentServiceImpl implements PaymentService {
         return userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PaymentDTO> getAllPayments() {
+
+        return paymentRepository.findAll()
+                .stream()
+                .map(payment -> PaymentDTO.builder()
+                        .id(payment.getId())
+                        .bookingId(payment.getBooking()
+                                .getId())
+                        .amount(payment.getAmount())
+                        .paymentMethod(payment.getPaymentMethod())
+                        .status(payment.getStatus())
+                        .razorpayOrderId(payment.getRazorpayOrderId())
+                        .razorpayPaymentId(payment.getRazorpayPaymentId())
+                        .razorpaySignature(payment.getRazorpaySignature())
+                        .createdAt(payment.getCreatedAt())
+                        .updatedAt(payment.getUpdatedAt())
+                        .build())
+                .toList();
+    }
+
 }

@@ -61,9 +61,13 @@ public class BookingServiceImpl implements BookingService {
 
         Coupon coupon = null;
 
-        coupon = couponRepository.findById(dto.getCouponCode())
-                .orElseThrow(() -> new ResourceNotFoundException("Coupon not found with code: " + dto.getCouponCode()));
+        if (dto.getCouponCode() != null && !dto.getCouponCode()
+                .isBlank()) {
 
+            coupon = couponRepository.findById(dto.getCouponCode())
+                    .orElseThrow(() -> new ResourceNotFoundException("Coupon not found with code: " + dto.getCouponCode()));
+        }
+        
         validateTime(dto.getStartTime(), dto.getEndTime());
         validateCar(car);
 

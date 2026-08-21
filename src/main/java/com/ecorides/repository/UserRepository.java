@@ -1,9 +1,11 @@
 package com.ecorides.repository;
 
+import com.ecorides.domain.UserRole;
 import com.ecorides.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,4 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    List<User> findByUserRole(UserRole userRole);
+
+    long countByUserRoleAndIsActiveTrue(UserRole userRole);
 }

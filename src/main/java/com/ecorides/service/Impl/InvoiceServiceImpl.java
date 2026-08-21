@@ -56,13 +56,19 @@ public class InvoiceServiceImpl implements InvoiceService {
             throw new BadRequestException("Payment incomplete");
         }
 
-        if (booking.getStatus() != BookingStatus.COMPLETED) {
-            throw new BadRequestException("Booking not completed");
+        if (booking.getStatus() != BookingStatus.CONFIRMED && booking.getStatus() != BookingStatus.ACTIVE && booking.getStatus() != BookingStatus.COMPLETED) {
+
+            throw new BadRequestException("Invoice can only be generated for a confirmed booking");
         }
 
         if (invoiceRepository.findByBookingId(bookingId)
                 .isPresent()) {
-            throw new BadRequestException("Invoice already exists");
+            Invoice existingInvoice = invoiceRepository.findByBookingId(bookingId)
+                    .orElse(null);
+
+            if (existingInvoice != null) {
+                return InvoiceMapper.toDto(existingInvoice);
+            }
         }
 
         BigDecimal amount = booking.getTotalAmount();
