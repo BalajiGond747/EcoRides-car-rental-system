@@ -12,6 +12,7 @@ import com.ecorides.exception.BadRequestException;
 import com.ecorides.exception.PaymentException;
 import com.ecorides.exception.ResourceNotFoundException;
 import com.ecorides.payload.dto.PaymentDTO;
+import com.ecorides.payload.response.PageResponse;
 import com.ecorides.repository.BookingRepository;
 import com.ecorides.repository.PaymentRepository;
 import com.ecorides.repository.UserRepository;
@@ -21,6 +22,10 @@ import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,6 +38,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -199,9 +205,69 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PaymentDTO> getAllPayments() {
+    public PageResponse<PaymentDTO> getAllPayments(int page, int size, String search, PaymentStatus status, PaymentMethod paymentMethod, String sortBy, String sortDir) {
 
-        return paymentRepository.findAll()
+        if (page < 0) {
+            page = 0;
+        }
+
+        if (size < 1) {
+            size = 10;
+        }
+
+        if (size > 100) {
+            size = 100;
+        }
+
+        Set<String> allowedSortFields = Set.of("id", "amount", "status", "paymentMethod", "createdAt", "updatedAt");
+
+        if (!allowedSortFields.contains(sortBy)) {
+            sortBy = "createdAt";
+        }
+
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        boolean hasSearch = search != null && !search.trim()
+                .isEmpty();
+
+        Page<Payment> paymentPage;
+
+        if (hasSearch && status != null && paymentMethod != null) {
+
+            paymentPage = paymentRepository.findBySearchAndStatusAndPaymentMethod(search.trim(), status, paymentMethod, pageable);
+
+        } else if (hasSearch && status != null) {
+
+            paymentPage = paymentRepository.findBySearchAndStatus(search.trim(), status, pageable);
+
+        } else if (hasSearch && paymentMethod != null) {
+
+            paymentPage = paymentRepository.findBySearchAndPaymentMethod(search.trim(), paymentMethod, pageable);
+
+        } else if (hasSearch) {
+
+            paymentPage = paymentRepository.findBySearch(search.trim(), pageable);
+
+        } else if (status != null && paymentMethod != null) {
+
+            paymentPage = paymentRepository.findByStatusAndPaymentMethod(status, paymentMethod, pageable);
+
+        } else if (status != null) {
+
+            paymentPage = paymentRepository.findByStatus(status, pageable);
+
+        } else if (paymentMethod != null) {
+
+            paymentPage = paymentRepository.findByPaymentMethod(paymentMethod, pageable);
+
+        } else {
+
+            paymentPage = paymentRepository.findAll(pageable);
+        }
+
+        List<PaymentDTO> payments = paymentPage.getContent()
                 .stream()
                 .map(payment -> PaymentDTO.builder()
                         .id(payment.getId())
@@ -217,6 +283,16 @@ public class PaymentServiceImpl implements PaymentService {
                         .updatedAt(payment.getUpdatedAt())
                         .build())
                 .toList();
+
+        return PageResponse.<PaymentDTO>builder()
+                .content(payments)
+                .page(paymentPage.getNumber())
+                .size(paymentPage.getSize())
+                .totalElements(paymentPage.getTotalElements())
+                .totalPages(paymentPage.getTotalPages())
+                .first(paymentPage.isFirst())
+                .last(paymentPage.isLast())
+                .build();
     }
 
 }

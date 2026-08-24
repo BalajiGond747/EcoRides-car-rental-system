@@ -2,6 +2,7 @@ package com.ecorides.controller;
 
 import com.ecorides.payload.request.UserUpdateRequest;
 import com.ecorides.payload.response.ApiResponse;
+import com.ecorides.payload.response.PageResponse;
 import com.ecorides.payload.response.UserResponse;
 import com.ecorides.service.UserService;
 import jakarta.validation.Valid;
@@ -11,7 +12,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -38,11 +38,11 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
+    public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> getAllUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String search, @RequestParam(required = false) Boolean isActive, @RequestParam(defaultValue = "createdAt") String sortBy, @RequestParam(defaultValue = "desc") String sortDir) {
 
-        List<UserResponse> users = userService.getAllUsers();
+        PageResponse<UserResponse> users = userService.getAllUsers(page, size, search, isActive, sortBy, sortDir);
 
-        ApiResponse<List<UserResponse>> apiResponse = ApiResponse.<List<UserResponse>>builder()
+        ApiResponse<PageResponse<UserResponse>> apiResponse = ApiResponse.<PageResponse<UserResponse>>builder()
                 .success(true)
                 .message("Users fetched successfully")
                 .data(users)
@@ -115,5 +115,5 @@ public class UserController {
 
         return ResponseEntity.ok(apiResponse);
     }
-    
+
 }

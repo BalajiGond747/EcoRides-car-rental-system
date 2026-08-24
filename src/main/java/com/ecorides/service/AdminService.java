@@ -2,13 +2,12 @@ package com.ecorides.service;
 
 import com.ecorides.payload.request.AdminCreateRequest;
 import com.ecorides.payload.request.UserUpdateRequest;
+import com.ecorides.payload.response.PageResponse;
 import com.ecorides.payload.response.UserResponse;
-
-import java.util.List;
 
 public interface AdminService {
 
-    List<UserResponse> getAllAdmins();
+    PageResponse<UserResponse> getAllAdmins(int page, int size, String sortBy, String sortDir);
 
     UserResponse getAdminById(Long id);
 

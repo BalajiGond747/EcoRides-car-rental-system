@@ -2,6 +2,8 @@ package com.ecorides.repository;
 
 import com.ecorides.domain.BookingStatus;
 import com.ecorides.entity.Booking;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -40,12 +42,16 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByCarId(Long carId);
 
-    List<Booking> findByStatus(BookingStatus status);
+    Page<Booking> findByStatus(BookingStatus status, Pageable pageable);
 
     List<Booking> findByCarIdAndStatusIn(Long carId, List<BookingStatus> statuses);
 
     List<Booking> findByLocationId(Long locationId);
 
     Optional<Booking> findByBookingReference(String bookingReference);
+
+    Page<Booking> findByBookingReferenceContainingIgnoreCase(String bookingReference, Pageable pageable);
+
+    Page<Booking> findByStatusAndBookingReferenceContainingIgnoreCase(BookingStatus status, String bookingReference, Pageable pageable);
 
 }

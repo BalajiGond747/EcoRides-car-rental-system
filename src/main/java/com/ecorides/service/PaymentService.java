@@ -1,8 +1,9 @@
 package com.ecorides.service;
 
+import com.ecorides.domain.PaymentMethod;
+import com.ecorides.domain.PaymentStatus;
 import com.ecorides.payload.dto.PaymentDTO;
-
-import java.util.List;
+import com.ecorides.payload.response.PageResponse;
 
 public interface PaymentService {
 
@@ -10,6 +11,5 @@ public interface PaymentService {
 
     void verifyPayment(PaymentDTO dto);
 
-    List<PaymentDTO> getAllPayments();
-
+    PageResponse<PaymentDTO> getAllPayments(int page, int size, String search, PaymentStatus status, PaymentMethod paymentMethod, String sortBy, String sortDir);
 }

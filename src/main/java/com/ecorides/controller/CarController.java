@@ -3,6 +3,7 @@ package com.ecorides.controller;
 import com.ecorides.domain.CarStatus;
 import com.ecorides.payload.dto.CarDTO;
 import com.ecorides.payload.response.ApiResponse;
+import com.ecorides.payload.response.PageResponse;
 import com.ecorides.service.CarService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -107,12 +108,14 @@ public class CarController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<ApiResponse<List<CarDTO>>> getAllCars() {
+    public ResponseEntity<ApiResponse<PageResponse<CarDTO>>> getAllCars(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String search, @RequestParam(required = false) String category, @RequestParam(required = false) CarStatus status, @RequestParam(required = false) Boolean isActive, @RequestParam(defaultValue = "createdAt") String sortBy, @RequestParam(defaultValue = "desc") String sortDir) {
 
-        return ResponseEntity.ok(ApiResponse.<List<CarDTO>>builder()
+        PageResponse<CarDTO> cars = carService.getAllCars(page, size, search, category, status, isActive, sortBy, sortDir);
+
+        return ResponseEntity.ok(ApiResponse.<PageResponse<CarDTO>>builder()
                 .success(true)
                 .message("Cars fetched successfully")
-                .data(carService.getAllCars())
+                .data(cars)
                 .timestamp(LocalDateTime.now())
                 .build());
     }

@@ -1,7 +1,9 @@
 package com.ecorides.controller;
 
+import com.ecorides.domain.CouponType;
 import com.ecorides.payload.dto.CouponDTO;
 import com.ecorides.payload.response.ApiResponse;
+import com.ecorides.payload.response.PageResponse;
 import com.ecorides.service.CouponService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +13,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/coupons")
@@ -36,12 +37,14 @@ public class CouponController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CouponDTO>>> getAllCoupons() {
+    public ResponseEntity<ApiResponse<PageResponse<CouponDTO>>> getAllCoupons(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String search, @RequestParam(required = false) CouponType type, @RequestParam(required = false) Boolean isActive, @RequestParam(defaultValue = "createdAt") String sortBy, @RequestParam(defaultValue = "desc") String sortDir) {
 
-        return ResponseEntity.ok(ApiResponse.<List<CouponDTO>>builder()
+        PageResponse<CouponDTO> coupons = service.getAllCoupons(page, size, search, type, isActive, sortBy, sortDir);
+
+        return ResponseEntity.ok(ApiResponse.<PageResponse<CouponDTO>>builder()
                 .success(true)
                 .message("Coupons fetched successfully")
-                .data(service.getAllCoupons())
+                .data(coupons)
                 .timestamp(LocalDateTime.now())
                 .build());
     }

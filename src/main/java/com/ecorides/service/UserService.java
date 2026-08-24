@@ -2,15 +2,14 @@ package com.ecorides.service;
 
 import com.ecorides.payload.request.PasswordUpdateRequest;
 import com.ecorides.payload.request.UserUpdateRequest;
+import com.ecorides.payload.response.PageResponse;
 import com.ecorides.payload.response.UserResponse;
-
-import java.util.List;
 
 public interface UserService {
 
     UserResponse getUserById(Long id);
 
-    List<UserResponse> getAllUsers();
+    PageResponse<UserResponse> getAllUsers(int page, int size, String search, Boolean isActive, String sortBy, String sortDir);
 
     UserResponse updateUser(Long id, UserUpdateRequest request);
 

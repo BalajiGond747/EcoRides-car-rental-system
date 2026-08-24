@@ -2,6 +2,7 @@ package com.ecorides.controller;
 
 import com.ecorides.payload.dto.LocationDTO;
 import com.ecorides.payload.response.ApiResponse;
+import com.ecorides.payload.response.PageResponse;
 import com.ecorides.service.LocationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +17,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/locations")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class LocationController {
 
     private final LocationService locationService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<LocationDTO>> createLocation(@Valid @RequestBody LocationDTO dto) {
 
         LocationDTO location = locationService.createLocation(dto);
@@ -36,6 +37,7 @@ public class LocationController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<LocationDTO>> getLocation(@PathVariable Long id) {
 
         return ResponseEntity.ok(ApiResponse.<LocationDTO>builder()
@@ -47,12 +49,15 @@ public class LocationController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<LocationDTO>>> getAllLocations() {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<PageResponse<LocationDTO>>> getAllLocations(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String search, @RequestParam(required = false) Boolean isActive) {
 
-        return ResponseEntity.ok(ApiResponse.<List<LocationDTO>>builder()
+        PageResponse<LocationDTO> locations = locationService.getAllLocations(page, size, search, isActive);
+
+        return ResponseEntity.ok(ApiResponse.<PageResponse<LocationDTO>>builder()
                 .success(true)
                 .message("Locations fetched successfully")
-                .data(locationService.getAllLocations())
+                .data(locations)
                 .timestamp(LocalDateTime.now())
                 .build());
     }
@@ -69,6 +74,7 @@ public class LocationController {
     }
 
     @GetMapping("/city/{city}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<LocationDTO>>> getByCity(@PathVariable String city) {
 
         return ResponseEntity.ok(ApiResponse.<List<LocationDTO>>builder()
@@ -80,6 +86,7 @@ public class LocationController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<LocationDTO>> updateLocation(@PathVariable Long id, @Valid @RequestBody LocationDTO dto) {
 
         return ResponseEntity.ok(ApiResponse.<LocationDTO>builder()
@@ -91,6 +98,7 @@ public class LocationController {
     }
 
     @PutMapping("/{id}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Object>> activateLocation(@PathVariable Long id) {
 
         locationService.activateLocation(id);
@@ -104,6 +112,7 @@ public class LocationController {
     }
 
     @PutMapping("/{id}/deactivate")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Object>> deactivateLocation(@PathVariable Long id) {
 
         locationService.deactivateLocation(id);

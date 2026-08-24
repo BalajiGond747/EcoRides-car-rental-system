@@ -2,6 +2,7 @@ package com.ecorides.service;
 
 import com.ecorides.domain.CarStatus;
 import com.ecorides.payload.dto.CarDTO;
+import com.ecorides.payload.response.PageResponse;
 
 import java.util.List;
 
@@ -19,7 +20,7 @@ public interface CarService {
 
     CarDTO getCarById(Long carId);
 
-    List<CarDTO> getAllCars();
+    PageResponse<CarDTO> getAllCars(int page, int size, String search, String category, CarStatus status, Boolean isActive, String sortBy, String sortDir);
 
     List<CarDTO> getAvailableCars();
 

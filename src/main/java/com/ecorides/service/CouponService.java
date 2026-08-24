@@ -1,9 +1,9 @@
 package com.ecorides.service;
 
+import com.ecorides.domain.CouponType;
 import com.ecorides.entity.Coupon;
 import com.ecorides.payload.dto.CouponDTO;
-
-import java.util.List;
+import com.ecorides.payload.response.PageResponse;
 
 public interface CouponService {
 
@@ -11,7 +11,7 @@ public interface CouponService {
 
     Coupon validateCoupon(String code);
 
-    List<CouponDTO> getAllCoupons();
+    PageResponse<CouponDTO> getAllCoupons(int page, int size, String search, CouponType type, Boolean isActive, String sortBy, String sortDir);
 
     void activateCoupon(String code);
 

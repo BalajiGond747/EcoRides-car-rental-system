@@ -9,14 +9,21 @@ import com.ecorides.exception.ConflictException;
 import com.ecorides.exception.ResourceNotFoundException;
 import com.ecorides.mappers.CarMapper;
 import com.ecorides.payload.dto.CarDTO;
+import com.ecorides.payload.response.PageResponse;
 import com.ecorides.repository.CarRepository;
 import com.ecorides.repository.LocationRepository;
 import com.ecorides.service.CarService;
 import com.ecorides.service.CarStatusLogService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -120,9 +127,95 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public List<CarDTO> getAllCars() {
+    @Transactional(readOnly = true)
+    public PageResponse<CarDTO> getAllCars(int page, int size, String search, String category, CarStatus status, Boolean isActive, String sortBy, String sortDir) {
 
-        return CarMapper.toDTOList(carRepository.findAll());
+        if (page < 0) {
+            page = 0;
+        }
+
+        if (size < 1) {
+            size = 10;
+        }
+
+        if (size > 100) {
+            size = 100;
+        }
+
+        Set<String> allowedSortFields = Set.of("id", "name", "category", "pricePerDay", "batteryLevel", "rangeKm", "seatingCapacity", "createdAt", "updatedAt");
+
+        if (!allowedSortFields.contains(sortBy)) {
+            sortBy = "createdAt";
+        }
+
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        boolean hasSearch = search != null && !search.trim()
+                .isEmpty();
+
+        boolean hasCategory = category != null && !category.trim()
+                .isEmpty();
+
+        Page<Car> carPage;
+
+        if (hasSearch && hasCategory && status != null && isActive != null) {
+
+            carPage = carRepository.findBySearchAndCategoryAndStatusAndIsActive(search.trim(), category.trim(), status, isActive, pageable);
+
+        } else if (hasSearch && hasCategory && status != null) {
+
+            carPage = carRepository.findBySearchAndCategoryAndStatus(search.trim(), category.trim(), status, pageable);
+
+        } else if (hasSearch && hasCategory) {
+
+            carPage = carRepository.findBySearchAndCategory(search.trim(), category.trim(), pageable);
+
+        } else if (hasSearch) {
+
+            carPage = carRepository.findBySearch(search.trim(), pageable);
+
+        } else if (hasCategory && status != null && isActive != null) {
+
+            carPage = carRepository.findByCategoryAndStatusAndIsActive(category.trim(), status, isActive, pageable);
+
+        } else if (hasCategory && status != null) {
+
+            carPage = carRepository.findByCategoryAndStatus(category.trim(), status, pageable);
+
+        } else if (hasCategory) {
+
+            carPage = carRepository.findByCategory(category.trim(), pageable);
+
+        } else if (status != null && isActive != null) {
+
+            carPage = carRepository.findByStatusAndIsActive(status, isActive, pageable);
+
+        } else if (status != null) {
+
+            carPage = carRepository.findByStatus(status, pageable);
+
+        } else if (isActive != null) {
+
+            carPage = carRepository.findByIsActive(isActive, pageable);
+
+        } else {
+
+            carPage = carRepository.findAll(pageable);
+        }
+
+        List<CarDTO> cars = CarMapper.toDTOList(carPage.getContent());
+
+        return PageResponse.<CarDTO>builder()
+                .content(cars)
+                .page(carPage.getNumber())
+                .size(carPage.getSize())
+                .totalElements(carPage.getTotalElements())
+                .totalPages(carPage.getTotalPages())
+                .first(carPage.isFirst())
+                .last(carPage.isLast())
+                .build();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.ecorides.service;
 
 import com.ecorides.payload.dto.LocationDTO;
+import com.ecorides.payload.response.PageResponse;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ public interface LocationService {
 
     LocationDTO getLocationById(Long id);
 
-    List<LocationDTO> getAllLocations();
+    PageResponse<LocationDTO> getAllLocations(int page, int size, String search, Boolean isActive);
 
     List<LocationDTO> getActiveLocations();
 

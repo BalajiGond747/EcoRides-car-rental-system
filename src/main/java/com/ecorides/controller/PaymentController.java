@@ -1,7 +1,10 @@
 package com.ecorides.controller;
 
+import com.ecorides.domain.PaymentMethod;
+import com.ecorides.domain.PaymentStatus;
 import com.ecorides.payload.dto.PaymentDTO;
 import com.ecorides.payload.response.ApiResponse;
+import com.ecorides.payload.response.PageResponse;
 import com.ecorides.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +13,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -49,11 +51,11 @@ public class PaymentController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<List<PaymentDTO>>> getAllPayments() {
+    public ResponseEntity<ApiResponse<PageResponse<PaymentDTO>>> getAllPayments(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String search, @RequestParam(required = false) PaymentStatus status, @RequestParam(required = false) PaymentMethod paymentMethod, @RequestParam(defaultValue = "createdAt") String sortBy, @RequestParam(defaultValue = "desc") String sortDir) {
 
-        List<PaymentDTO> payments = paymentService.getAllPayments();
+        PageResponse<PaymentDTO> payments = paymentService.getAllPayments(page, size, search, status, paymentMethod, sortBy, sortDir);
 
-        return ResponseEntity.ok(ApiResponse.<List<PaymentDTO>>builder()
+        return ResponseEntity.ok(ApiResponse.<PageResponse<PaymentDTO>>builder()
                 .success(true)
                 .message("Payments fetched successfully")
                 .data(payments)

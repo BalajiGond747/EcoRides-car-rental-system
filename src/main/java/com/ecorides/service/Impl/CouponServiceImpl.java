@@ -6,15 +6,21 @@ import com.ecorides.exception.BadRequestException;
 import com.ecorides.exception.ResourceNotFoundException;
 import com.ecorides.mappers.CouponMapper;
 import com.ecorides.payload.dto.CouponDTO;
+import com.ecorides.payload.response.PageResponse;
 import com.ecorides.repository.CouponRepository;
 import com.ecorides.service.CouponService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -87,13 +93,82 @@ public class CouponServiceImpl implements CouponService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CouponDTO> getAllCoupons() {
+    public PageResponse<CouponDTO> getAllCoupons(int page, int size, String search, CouponType type, Boolean isActive, String sortBy, String sortDir) {
 
-        return repository.findAll()
+        if (page < 0) {
+            page = 0;
+        }
+
+        if (size < 1) {
+            size = 10;
+        }
+
+        if (size > 100) {
+            size = 100;
+        }
+
+        Set<String> allowedSortFields = Set.of("code", "value", "expiryDate", "createdAt", "updatedAt");
+
+        if (!allowedSortFields.contains(sortBy)) {
+            sortBy = "createdAt";
+        }
+
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        boolean hasSearch = search != null && !search.trim()
+                .isEmpty();
+
+        Page<Coupon> couponPage;
+
+        if (hasSearch && type != null && isActive != null) {
+
+            couponPage = repository.findByCodeContainingIgnoreCaseAndTypeAndIsActive(search.trim(), type, isActive, pageable);
+
+        } else if (hasSearch && type != null) {
+
+            couponPage = repository.findByCodeContainingIgnoreCaseAndType(search.trim(), type, pageable);
+
+        } else if (hasSearch && isActive != null) {
+
+            couponPage = repository.findByCodeContainingIgnoreCaseAndIsActive(search.trim(), isActive, pageable);
+
+        } else if (hasSearch) {
+
+            couponPage = repository.findByCodeContainingIgnoreCase(search.trim(), pageable);
+
+        } else if (type != null && isActive != null) {
+
+            couponPage = repository.findByTypeAndIsActive(type, isActive, pageable);
+
+        } else if (type != null) {
+
+            couponPage = repository.findByType(type, pageable);
+
+        } else if (isActive != null) {
+
+            couponPage = repository.findByIsActive(isActive, pageable);
+
+        } else {
+
+            couponPage = repository.findAll(pageable);
+        }
+
+        List<CouponDTO> coupons = couponPage.getContent()
                 .stream()
                 .map(CouponMapper::toDto)
                 .toList();
 
+        return PageResponse.<CouponDTO>builder()
+                .content(coupons)
+                .page(couponPage.getNumber())
+                .size(couponPage.getSize())
+                .totalElements(couponPage.getTotalElements())
+                .totalPages(couponPage.getTotalPages())
+                .first(couponPage.isFirst())
+                .last(couponPage.isLast())
+                .build();
     }
 
     @Override

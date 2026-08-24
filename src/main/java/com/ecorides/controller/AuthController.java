@@ -1,9 +1,12 @@
 package com.ecorides.controller;
 
 import com.ecorides.domain.OtpPurpose;
+import com.ecorides.ouath2.OAuth2LoginCode;
+import com.ecorides.ouath2.OAuth2LoginCodeService;
 import com.ecorides.payload.request.*;
 import com.ecorides.payload.response.ApiResponse;
 import com.ecorides.payload.response.AuthResponse;
+import com.ecorides.security.JwtUtil;
 import com.ecorides.service.AuthService;
 import com.ecorides.service.OtpService;
 import jakarta.validation.Valid;
@@ -22,6 +25,8 @@ public class AuthController {
 
     private final AuthService authService;
     private final OtpService otpService;
+    private final OAuth2LoginCodeService oauth2LoginCodeService;
+    private final JwtUtil jwtUtil;
 
     @PostMapping("/send-registration-otp")
     public ResponseEntity<ApiResponse<Void>> sendRegistrationOtp(@Valid @RequestBody SendOtpRequest request) {
@@ -167,6 +172,28 @@ public class AuthController {
                 .success(true)
                 .message("Email updated successfully")
                 .data(null)
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @PostMapping("/oauth2/exchange")
+    public ResponseEntity<ApiResponse<AuthResponse>> exchangeOAuthCode(@RequestParam String code) {
+
+        OAuth2LoginCode loginCode = oauth2LoginCodeService.consumeCode(code);
+
+        String token = jwtUtil.generateToken(loginCode.email());
+
+        AuthResponse response = AuthResponse.builder()
+                .token(token)
+                .userId(loginCode.userId())
+                .email(loginCode.email())
+                .userRole(loginCode.userRole())
+                .build();
+
+        return ResponseEntity.ok(ApiResponse.<AuthResponse>builder()
+                .success(true)
+                .message("Google login successful")
+                .data(response)
                 .timestamp(LocalDateTime.now())
                 .build());
     }

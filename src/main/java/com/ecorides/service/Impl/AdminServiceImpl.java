@@ -10,15 +10,21 @@ import com.ecorides.exception.UserException;
 import com.ecorides.mappers.UserMapper;
 import com.ecorides.payload.request.AdminCreateRequest;
 import com.ecorides.payload.request.UserUpdateRequest;
+import com.ecorides.payload.response.PageResponse;
 import com.ecorides.payload.response.UserResponse;
 import com.ecorides.repository.UserRepository;
 import com.ecorides.service.AdminService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -30,9 +36,43 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserResponse> getAllAdmins() {
+    public PageResponse<UserResponse> getAllAdmins(int page, int size, String sortBy, String sortDir) {
 
-        return UserMapper.toUserResponseList(userRepository.findByUserRole(UserRole.ADMIN));
+        if (page < 0) {
+            page = 0;
+        }
+
+        if (size < 1) {
+            size = 10;
+        }
+
+        if (size > 100) {
+            size = 100;
+        }
+
+        Set<String> allowedSortFields = Set.of("id", "firstName", "lastName", "email", "createdAt", "updatedAt");
+
+        if (!allowedSortFields.contains(sortBy)) {
+            sortBy = "createdAt";
+        }
+
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        Page<User> adminPage = userRepository.findByUserRole(UserRole.ADMIN, pageable);
+
+        List<UserResponse> admins = UserMapper.toUserResponseList(adminPage.getContent());
+
+        return PageResponse.<UserResponse>builder()
+                .content(admins)
+                .page(adminPage.getNumber())
+                .size(adminPage.getSize())
+                .totalElements(adminPage.getTotalElements())
+                .totalPages(adminPage.getTotalPages())
+                .first(adminPage.isFirst())
+                .last(adminPage.isLast())
+                .build();
     }
 
     @Override

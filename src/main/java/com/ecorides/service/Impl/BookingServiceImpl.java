@@ -9,9 +9,14 @@ import com.ecorides.exception.BadRequestException;
 import com.ecorides.exception.ResourceNotFoundException;
 import com.ecorides.mappers.BookingMapper;
 import com.ecorides.payload.dto.BookingDto;
+import com.ecorides.payload.response.PageResponse;
 import com.ecorides.repository.*;
 import com.ecorides.service.BookingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +27,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -67,7 +73,7 @@ public class BookingServiceImpl implements BookingService {
             coupon = couponRepository.findById(dto.getCouponCode())
                     .orElseThrow(() -> new ResourceNotFoundException("Coupon not found with code: " + dto.getCouponCode()));
         }
-        
+
         validateTime(dto.getStartTime(), dto.getEndTime());
         validateCar(car);
 
@@ -113,9 +119,63 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingDto> getAllBookings() {
+    public PageResponse<BookingDto> getAllBookings(int page, int size, String search, BookingStatus status, String sortBy, String sortDir) {
 
-        return BookingMapper.toDtoList(bookingRepository.findAll());
+        if (page < 0) {
+            page = 0;
+        }
+
+        if (size < 1) {
+            size = 10;
+        }
+
+        if (size > 100) {
+            size = 100;
+        }
+
+        Set<String> allowedSortFields = Set.of("id", "bookingReference", "startTime", "endTime", "totalAmount", "status", "createdAt", "updatedAt");
+
+        if (!allowedSortFields.contains(sortBy)) {
+            sortBy = "createdAt";
+        }
+
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        boolean hasSearch = search != null && !search.trim()
+                .isEmpty();
+
+        Page<Booking> bookingPage;
+
+        if (hasSearch && status != null) {
+
+            bookingPage = bookingRepository.findByStatusAndBookingReferenceContainingIgnoreCase(status, search.trim(), pageable);
+
+        } else if (hasSearch) {
+
+            bookingPage = bookingRepository.findByBookingReferenceContainingIgnoreCase(search.trim(), pageable);
+
+        } else if (status != null) {
+
+            bookingPage = bookingRepository.findByStatus(status, pageable);
+
+        } else {
+
+            bookingPage = bookingRepository.findAll(pageable);
+        }
+
+        List<BookingDto> bookings = BookingMapper.toDtoList(bookingPage.getContent());
+
+        return PageResponse.<BookingDto>builder()
+                .content(bookings)
+                .page(bookingPage.getNumber())
+                .size(bookingPage.getSize())
+                .totalElements(bookingPage.getTotalElements())
+                .totalPages(bookingPage.getTotalPages())
+                .first(bookingPage.isFirst())
+                .last(bookingPage.isLast())
+                .build();
     }
 
     @Override

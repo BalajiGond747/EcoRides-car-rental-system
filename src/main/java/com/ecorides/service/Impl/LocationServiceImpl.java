@@ -6,9 +6,14 @@ import com.ecorides.exception.ConflictException;
 import com.ecorides.exception.LocationException;
 import com.ecorides.mappers.LocationMapper;
 import com.ecorides.payload.dto.LocationDTO;
+import com.ecorides.payload.response.PageResponse;
 import com.ecorides.repository.LocationRepository;
 import com.ecorides.service.LocationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,9 +52,55 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<LocationDTO> getAllLocations() {
+    public PageResponse<LocationDTO> getAllLocations(int page, int size, String search, Boolean isActive) {
 
-        return LocationMapper.toDtoList(locationRepository.findAll());
+        if (page < 0) {
+            page = 0;
+        }
+
+        if (size < 1) {
+            size = 10;
+        }
+
+        if (size > 100) {
+            size = 100;
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
+
+        Page<Location> locationPage;
+
+        boolean hasSearch = search != null && !search.trim()
+                .isEmpty();
+
+        if (hasSearch && isActive != null) {
+
+            locationPage = locationRepository.findBySearchAndIsActive(search.trim(), isActive, pageable);
+
+        } else if (hasSearch) {
+
+            locationPage = locationRepository.findBySearch(search.trim(), pageable);
+
+        } else if (isActive != null) {
+
+            locationPage = locationRepository.findByIsActive(isActive, pageable);
+
+        } else {
+
+            locationPage = locationRepository.findAll(pageable);
+        }
+
+        List<LocationDTO> locations = LocationMapper.toDtoList(locationPage.getContent());
+
+        return PageResponse.<LocationDTO>builder()
+                .content(locations)
+                .page(locationPage.getNumber())
+                .size(locationPage.getSize())
+                .totalElements(locationPage.getTotalElements())
+                .totalPages(locationPage.getTotalPages())
+                .first(locationPage.isFirst())
+                .last(locationPage.isLast())
+                .build();
     }
 
     @Override

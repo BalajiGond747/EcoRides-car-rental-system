@@ -3,6 +3,7 @@ package com.ecorides.controller;
 import com.ecorides.payload.request.AdminCreateRequest;
 import com.ecorides.payload.request.UserUpdateRequest;
 import com.ecorides.payload.response.ApiResponse;
+import com.ecorides.payload.response.PageResponse;
 import com.ecorides.payload.response.UserResponse;
 import com.ecorides.service.AdminService;
 import jakarta.validation.Valid;
@@ -13,7 +14,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/admins")
@@ -24,12 +24,14 @@ public class AdminController {
     private final AdminService adminService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllAdmins() {
+    public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> getAllAdmins(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "createdAt") String sortBy, @RequestParam(defaultValue = "desc") String sortDir) {
 
-        return ResponseEntity.ok(ApiResponse.<List<UserResponse>>builder()
+        PageResponse<UserResponse> admins = adminService.getAllAdmins(page, size, sortBy, sortDir);
+
+        return ResponseEntity.ok(ApiResponse.<PageResponse<UserResponse>>builder()
                 .success(true)
                 .message("Admins fetched successfully")
-                .data(adminService.getAllAdmins())
+                .data(admins)
                 .timestamp(LocalDateTime.now())
                 .build());
     }

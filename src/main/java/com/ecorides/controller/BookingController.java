@@ -1,7 +1,9 @@
 package com.ecorides.controller;
 
+import com.ecorides.domain.BookingStatus;
 import com.ecorides.payload.dto.BookingDto;
 import com.ecorides.payload.response.ApiResponse;
+import com.ecorides.payload.response.PageResponse;
 import com.ecorides.service.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -53,15 +55,16 @@ public class BookingController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<List<BookingDto>>> getAllBookings() {
+    public ResponseEntity<ApiResponse<PageResponse<BookingDto>>> getAllBookings(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String search, @RequestParam(required = false) BookingStatus status, @RequestParam(defaultValue = "createdAt") String sortBy, @RequestParam(defaultValue = "desc") String sortDir) {
 
-        return ResponseEntity.ok(ApiResponse.<List<BookingDto>>builder()
+        PageResponse<BookingDto> bookings = bookingService.getAllBookings(page, size, search, status, sortBy, sortDir);
+
+        return ResponseEntity.ok(ApiResponse.<PageResponse<BookingDto>>builder()
                 .success(true)
                 .message("Bookings fetched successfully")
-                .data(bookingService.getAllBookings())
+                .data(bookings)
                 .timestamp(LocalDateTime.now())
                 .build());
-
     }
 
     @GetMapping("/user/{userId}")
