@@ -63,4 +63,18 @@ public class PaymentController {
                 .build());
     }
 
+    @GetMapping("/booking/{bookingId}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<PaymentDTO>> getPaymentByBooking(@PathVariable Long bookingId) {
+
+        PaymentDTO payment = paymentService.getPaymentByBooking(bookingId);
+
+        return ResponseEntity.ok(ApiResponse.<PaymentDTO>builder()
+                .success(true)
+                .message("Payment fetched successfully")
+                .data(payment)
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
 }

@@ -295,4 +295,36 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public PaymentDTO getPaymentByBooking(Long bookingId) {
+
+        Payment payment = paymentRepository.findByBookingId(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found for booking: " + bookingId));
+
+        User currentUser = getAuthenticatedUser();
+
+        if (currentUser.getUserRole() != UserRole.ADMIN && !payment.getBooking()
+                .getUser()
+                .getId()
+                .equals(currentUser.getId())) {
+
+            throw new AccessDeniedException("You do not have permission to access this payment");
+        }
+
+        return PaymentDTO.builder()
+                .id(payment.getId())
+                .bookingId(payment.getBooking()
+                        .getId())
+                .amount(payment.getAmount())
+                .paymentMethod(payment.getPaymentMethod())
+                .status(payment.getStatus())
+                .razorpayOrderId(payment.getRazorpayOrderId())
+                .razorpayPaymentId(payment.getRazorpayPaymentId())
+                .razorpaySignature(payment.getRazorpaySignature())
+                .createdAt(payment.getCreatedAt())
+                .updatedAt(payment.getUpdatedAt())
+                .build();
+    }
+
 }

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -27,4 +28,8 @@ public interface CouponRepository extends JpaRepository<Coupon, String> {
     Page<Coupon> findByTypeAndIsActive(CouponType type, Boolean isActive, Pageable pageable);
 
     Page<Coupon> findByIsActive(Boolean isActive, Pageable pageable);
+
+    Page<Coupon> findByIsActiveTrueAndExpiryDateGreaterThanEqual(LocalDate date, Pageable pageable);
+
+    Page<Coupon> findByCodeContainingIgnoreCaseAndIsActiveTrueAndExpiryDateGreaterThanEqual(String code, LocalDate date, Pageable pageable);
 }

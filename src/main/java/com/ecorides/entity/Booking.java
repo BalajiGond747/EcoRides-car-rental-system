@@ -36,6 +36,15 @@ public class Booking {
     @JoinColumn(name = "location_id", nullable = false)
     private Location location;
 
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal rentalAmount;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal discountAmount;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal taxAmount;
+
     @Column(nullable = false)
     private LocalDateTime startTime;
 

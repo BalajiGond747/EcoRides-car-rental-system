@@ -132,8 +132,14 @@ public class CouponServiceImpl implements CouponService {
 
         } else if (hasSearch && isActive != null) {
 
-            couponPage = repository.findByCodeContainingIgnoreCaseAndIsActive(search.trim(), isActive, pageable);
+            if (Boolean.TRUE.equals(isActive)) {
 
+                couponPage = repository.findByCodeContainingIgnoreCaseAndIsActiveTrueAndExpiryDateGreaterThanEqual(search.trim(), LocalDate.now(), pageable);
+
+            } else {
+
+                couponPage = repository.findByCodeContainingIgnoreCaseAndIsActive(search.trim(), false, pageable);
+            }
         } else if (hasSearch) {
 
             couponPage = repository.findByCodeContainingIgnoreCase(search.trim(), pageable);
@@ -148,7 +154,15 @@ public class CouponServiceImpl implements CouponService {
 
         } else if (isActive != null) {
 
-            couponPage = repository.findByIsActive(isActive, pageable);
+            if (Boolean.TRUE.equals(isActive)) {
+
+                couponPage = repository.findByIsActiveTrueAndExpiryDateGreaterThanEqual(LocalDate.now(), pageable);
+
+            } else {
+
+                couponPage = repository.findByIsActive(false, pageable);
+
+            }
 
         } else {
 

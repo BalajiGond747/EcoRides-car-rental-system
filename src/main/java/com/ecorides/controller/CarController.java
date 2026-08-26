@@ -8,9 +8,11 @@ import com.ecorides.service.CarService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,11 +24,11 @@ public class CarController {
 
     private final CarService carService;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<CarDTO>> createCar(@Valid @RequestBody CarDTO dto) {
+    public ResponseEntity<ApiResponse<CarDTO>> createCar(@Valid @RequestPart("car") CarDTO dto, @RequestPart("image") MultipartFile image) {
 
-        CarDTO car = carService.createCar(dto);
+        CarDTO car = carService.createCar(dto, image);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.<CarDTO>builder()
@@ -37,11 +39,11 @@ public class CarController {
                         .build());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<CarDTO>> updateCar(@PathVariable Long id, @Valid @RequestBody CarDTO dto) {
+    public ResponseEntity<ApiResponse<CarDTO>> updateCar(@PathVariable Long id, @Valid @RequestPart("car") CarDTO dto, @RequestPart(value = "image", required = false) MultipartFile image) {
 
-        CarDTO car = carService.updateCar(id, dto);
+        CarDTO car = carService.updateCar(id, dto, image);
 
         return ResponseEntity.ok(ApiResponse.<CarDTO>builder()
                 .success(true)
@@ -108,7 +110,7 @@ public class CarController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<ApiResponse<PageResponse<CarDTO>>> getAllCars(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String search, @RequestParam(required = false) String category, @RequestParam(required = false) CarStatus status, @RequestParam(required = false) Boolean isActive, @RequestParam(defaultValue = "createdAt") String sortBy, @RequestParam(defaultValue = "desc") String sortDir) {
+    public ResponseEntity<ApiResponse<PageResponse<CarDTO>>> getAllCars(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "9") int size, @RequestParam(required = false) String search, @RequestParam(required = false) String category, @RequestParam(required = false) CarStatus status, @RequestParam(required = false) Boolean isActive, @RequestParam(defaultValue = "createdAt") String sortBy, @RequestParam(defaultValue = "desc") String sortDir) {
 
         PageResponse<CarDTO> cars = carService.getAllCars(page, size, search, category, status, isActive, sortBy, sortDir);
 

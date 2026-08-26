@@ -1,7 +1,5 @@
 package com.ecorides.payload.dto;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,8 +16,6 @@ public class InvoiceDTO {
 
     private Long id;
 
-    @NotNull(message = "Booking is required")
-    @Positive(message = "Booking ID must be positive")
     private Long bookingId;
 
     private String invoiceNumber;

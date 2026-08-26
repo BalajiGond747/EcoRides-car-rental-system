@@ -26,9 +26,13 @@ public class BookingDto {
     @Positive(message = "Car ID must be positive")
     private Long carId;
 
+    private String carName;
+
     @NotNull(message = "Location is required")
     @Positive(message = "Location ID must be positive")
     private Long locationId;
+
+    private String locationName;
 
     private String couponCode;
 
@@ -39,6 +43,14 @@ public class BookingDto {
     @NotNull(message = "End time is required")
     @Future(message = "End time must be in the future")
     private LocalDateTime endTime;
+
+    private Long rentalDays;
+
+    private BigDecimal rentalAmount;
+
+    private BigDecimal discountAmount;
+
+    private BigDecimal taxAmount;
 
     private BigDecimal totalAmount;
 

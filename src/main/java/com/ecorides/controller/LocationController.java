@@ -37,7 +37,7 @@ public class LocationController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<LocationDTO>> getLocation(@PathVariable Long id) {
 
         return ResponseEntity.ok(ApiResponse.<LocationDTO>builder()

@@ -47,7 +47,3 @@ Improve booking logic (pricing, duration, cancellation fees)
 
 CI/CD pipeline
  
-
-
-
-

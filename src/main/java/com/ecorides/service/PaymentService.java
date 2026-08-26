@@ -12,4 +12,6 @@ public interface PaymentService {
     void verifyPayment(PaymentDTO dto);
 
     PageResponse<PaymentDTO> getAllPayments(int page, int size, String search, PaymentStatus status, PaymentMethod paymentMethod, String sortBy, String sortDir);
+
+    PaymentDTO getPaymentByBooking(Long bookingId);
 }

@@ -3,14 +3,15 @@ package com.ecorides.service;
 import com.ecorides.domain.CarStatus;
 import com.ecorides.payload.dto.CarDTO;
 import com.ecorides.payload.response.PageResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface CarService {
 
-    CarDTO createCar(CarDTO carDTO);
+    CarDTO createCar(CarDTO carDTO, MultipartFile image);
 
-    CarDTO updateCar(Long carId, CarDTO carDTO);
+    CarDTO updateCar(Long carId, CarDTO carDTO, MultipartFile image);
 
     void activateCar(Long carId);
 

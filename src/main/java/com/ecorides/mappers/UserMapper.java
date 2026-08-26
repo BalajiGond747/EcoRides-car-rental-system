@@ -32,6 +32,7 @@ public class UserMapper {
                 .email(user.getEmail())
                 .address(user.getAddress())
                 .userRole(user.getUserRole())
+                .isActive(user.getIsActive())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();

@@ -17,12 +17,12 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/api/coupons")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class CouponController {
 
     private final CouponService service;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<CouponDTO>> createCoupon(@Valid @RequestBody CouponDTO dto) {
 
         CouponDTO coupon = service.createCoupon(dto);
@@ -50,6 +50,7 @@ public class CouponController {
     }
 
     @PutMapping("/{code}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Object>> activateCoupon(@PathVariable String code) {
 
         service.activateCoupon(code);
@@ -63,6 +64,7 @@ public class CouponController {
     }
 
     @PutMapping("/{code}/deactivate")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Object>> deactivateCoupon(@PathVariable String code) {
 
         service.deactivateCoupon(code);

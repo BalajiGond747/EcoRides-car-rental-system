@@ -23,4 +23,5 @@ public class UserResponse {
     private UserRole userRole;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Boolean isActive;
 }

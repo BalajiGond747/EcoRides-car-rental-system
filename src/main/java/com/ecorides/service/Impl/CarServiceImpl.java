@@ -14,6 +14,7 @@ import com.ecorides.repository.CarRepository;
 import com.ecorides.repository.LocationRepository;
 import com.ecorides.service.CarService;
 import com.ecorides.service.CarStatusLogService;
+import com.ecorides.service.ImageStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Set;
@@ -32,9 +34,10 @@ public class CarServiceImpl implements CarService {
     private final CarRepository carRepository;
     private final LocationRepository locationRepository;
     private final CarStatusLogService carStatusLogService;
+    private final ImageStorageService imageStorageService;
 
     @Override
-    public CarDTO createCar(CarDTO dto) {
+    public CarDTO createCar(CarDTO dto, MultipartFile image) {
 
         String registrationNumber = dto.getRegistrationNumber()
                 .trim()
@@ -49,6 +52,13 @@ public class CarServiceImpl implements CarService {
 
         dto.setRegistrationNumber(registrationNumber);
 
+        if (image == null || image.isEmpty()) {
+            throw new BadRequestException("Car image is required");
+        }
+
+        String imageUrl = imageStorageService.storeCarImage(image);
+        dto.setImageUrl(imageUrl);
+
         Car car = CarMapper.toEntity(dto);
         car.setLocation(location);
         Car saved = carRepository.save(car);
@@ -57,7 +67,7 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public CarDTO updateCar(Long carId, CarDTO dto) {
+    public CarDTO updateCar(Long carId, CarDTO dto, MultipartFile image) {
 
         Car car = getCar(carId);
 
@@ -84,6 +94,18 @@ public class CarServiceImpl implements CarService {
         }
 
         CarMapper.updateEntity(car, dto);
+
+        if (image != null && !image.isEmpty()) {
+
+            String oldImageUrl = car.getImageUrl();
+            String newImageUrl = imageStorageService.storeCarImage(image);
+
+            car.setImageUrl(newImageUrl);
+
+            if (oldImageUrl != null && !oldImageUrl.isBlank()) {
+                imageStorageService.deleteCarImage(oldImageUrl);
+            }
+        }
 
         return CarMapper.toDTO(carRepository.save(car));
     }
@@ -135,7 +157,7 @@ public class CarServiceImpl implements CarService {
         }
 
         if (size < 1) {
-            size = 10;
+            size = 9;
         }
 
         if (size > 100) {
