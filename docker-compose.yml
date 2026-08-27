@@ -1,0 +1,72 @@
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: ecorides-mysql
+
+    restart: unless-stopped
+
+    environment:
+      MYSQL_DATABASE: car_rental
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+
+    ports:
+      - "3307:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_PASSWORD}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: ecorides-backend
+
+    restart: unless-stopped
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+    ports:
+      - "8080:8080"
+
+
+    volumes:
+      - car_images:/app/uploads
+
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      JWT_SECRET: ${JWT_SECRET}
+
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_FIRST_NAME: ${ADMIN_FIRST_NAME}
+      ADMIN_LAST_NAME: ${ADMIN_LAST_NAME}
+      ADMIN_PHONE: ${ADMIN_PHONE}
+      ADMIN_ADDRESS: ${ADMIN_ADDRESS}
+
+volumes:
+  mysql_data:
+  car_images:

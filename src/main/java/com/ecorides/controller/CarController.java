@@ -97,7 +97,6 @@ public class CarController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<ApiResponse<CarDTO>> getCarById(@PathVariable Long id) {
 
         return ResponseEntity.ok(ApiResponse.<CarDTO>builder()
@@ -109,7 +108,6 @@ public class CarController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<ApiResponse<PageResponse<CarDTO>>> getAllCars(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "9") int size, @RequestParam(required = false) String search, @RequestParam(required = false) String category, @RequestParam(required = false) CarStatus status, @RequestParam(required = false) Boolean isActive, @RequestParam(defaultValue = "createdAt") String sortBy, @RequestParam(defaultValue = "desc") String sortDir) {
 
         PageResponse<CarDTO> cars = carService.getAllCars(page, size, search, category, status, isActive, sortBy, sortDir);

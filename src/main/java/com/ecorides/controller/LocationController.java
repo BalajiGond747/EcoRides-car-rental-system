@@ -37,7 +37,6 @@ public class LocationController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<LocationDTO>> getLocation(@PathVariable Long id) {
 
         return ResponseEntity.ok(ApiResponse.<LocationDTO>builder()
@@ -49,7 +48,6 @@ public class LocationController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<PageResponse<LocationDTO>>> getAllLocations(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String search, @RequestParam(required = false) Boolean isActive) {
 
         PageResponse<LocationDTO> locations = locationService.getAllLocations(page, size, search, isActive);
