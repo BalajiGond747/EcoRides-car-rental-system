@@ -44,6 +44,9 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**")
                         .permitAll()
 
+                        .requestMatchers("/actuator/health")
+                        .permitAll()
+
                         .requestMatchers("/api/auth/**")
                         .permitAll()
 
